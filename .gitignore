@@ -1,0 +1,33 @@
+# Diretórios e arquivos do ambiente virtual Python
+venv/
+.env/
+
+# Arquivos de configuração específicos do IDE
+*.pyc
+__pycache__/
+
+# Arquivos de banco de dados
+*.sqlite3
+*.db
+
+# Arquivos gerados pelo Flask
+instance/
+
+# Arquivos de log
+*.log
+
+# Arquivos de configuração do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de cache
+*.cache
+
+# Arquivos de build
+build/
+dist/
+*.egg-info/
+
+# Arquivos temporários
+*.tmp
+*.swp
