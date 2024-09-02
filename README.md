@@ -45,8 +45,9 @@ Em seguida, instale as dependências:
 
 3. **Inicialize o Banco de Dados:** Certifique-se de que o arquivo **pet.db**  esteja criado e configure o esquema do banco de dados. O arquivo **app.py** deve criar automaticamente o banco de dados e a tabela pets se não existirem.
 </br>
+
 4. **Execute a Aplicação:**
 ```bash
-python app.py
+  python app.py
 ```
 A aplicação estará disponível em http://localhost:5000.
