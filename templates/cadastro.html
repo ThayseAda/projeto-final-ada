@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Pet</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Cadastro de Pet</h1>
+        <form id="cadastroForm">
+            <label for="nome">Nome do pet:</label>
+            <input type="text" id="nome" name="nome" required><br>
+
+            <label for="idade">Idade do pet:</label>
+            <input type="number" id="idade" name="idade" required><br>
+
+            <label for="peso">Peso do pet:</label>
+            <input type="number" step="0.01" id="peso" name="peso" required><br>
+
+            <button type="submit">Cadastrar</button>
+        </form>
+        <a href="/">Voltar</a>
+    </div>
+
+    <!-- Balão de notificação -->
+    <div id="notification" class="notification">Pet cadastrado com sucesso!</div>
+
+    <script>
+        document.getElementById('cadastroForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita o envio padrão do formulário
+
+            const formData = new FormData(this);
+
+            fetch('/add', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Exibe a notificação
+                    const notification = document.getElementById('notification');
+                    notification.style.display = 'block';
+                    
+                    // Oculta a notificação após 3 segundos
+                    setTimeout(() => {
+                        notification.style.display = 'none';
+                    }, 3000);
+
+                    // Limpa o formulário
+                    this.reset();
+                }
+            })
+            .catch(error => console.error('Erro:', error));
+        });
+    </script>
+</body>
+</html>

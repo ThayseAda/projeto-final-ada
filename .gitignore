@@ -31,4 +31,12 @@ dist/
 
 # Arquivos temporários
 *.tmp
+<<<<<<< HEAD
+<<<<<<< HEAD
 *.swp
+=======
+*.swp
+>>>>>>> dev/vinicius
+=======
+*.swp
+>>>>>>> doc/readme
