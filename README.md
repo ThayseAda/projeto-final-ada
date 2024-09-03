@@ -29,8 +29,8 @@ Esta é uma aplicação web simples para cadastrar e consultar informações sob
 
 1. **Clone o Repositório:**
 ```bash
-   git clone https://github.com/seu-usuario/seu-repositorio.git
-   cd seu-repositorio
+   git https://github.com/viniciuscaol/projeto-final-ada.git
+   cd projeto-final-ada
 ```
 
 2. **Instale as Dependências:** Certifique-se de ter o Python instalado e crie um ambiente virtual:
