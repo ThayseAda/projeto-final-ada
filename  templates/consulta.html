@@ -16,13 +16,10 @@
                 <option value="idade">Idade</option>
                 <option value="peso">Peso</option>
             </select>
-
-            <label for="valor">Digite o valor da busca:</label>
+            <label for="valor">Digite a informação da busca:</label>
             <input type="text" id="valor" name="valor">
-
             <button type="submit">Buscar</button>
         </form>
-
         {% if pets is not none %}
         <h2>Resultado da Busca:</h2>
         <ul>

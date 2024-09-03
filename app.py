@@ -100,6 +100,24 @@ def editar_pet(id):
 
     return render_template('editar.html', pet=pet)
 
+@app.route('/delete/<int:pet_id>', methods=['POST'])
+def delete_pet(pet_id):
+    conn = sqlite3.connect('pet.db')
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("DELETE FROM pets WHERE id = ?", (pet_id,))
+        conn.commit()
+        # Mensagem de sucesso (opcional)
+        flash('Pet excluído com sucesso!')
+    except sqlite3.Error as e:
+        # Tratar erros, por exemplo, exibir uma mensagem de erro
+        print(e)
+        flash('Erro ao excluir o pet.')
+
+    conn.close()
+    return redirect('/consulta')
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)
