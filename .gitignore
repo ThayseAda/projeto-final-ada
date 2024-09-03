@@ -20,6 +20,7 @@ instance/
 # Arquivos de configuração do sistema
 .DS_Store
 Thumbs.db
+*.db
 
 # Arquivos de cache
 *.cache
