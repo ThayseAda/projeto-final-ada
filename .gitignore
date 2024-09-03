@@ -1,0 +1,13 @@
+# Ignorar um arquivo específico
+guia_passos.txt
+
+# Ignorar todos os arquivos com extensão .log
+*.log
+
+# Ignorar um diretório específico
+temp/
+
+# Ignorar todos os arquivos em um diretório específico
+build/*
+
+
