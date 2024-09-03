@@ -1,31 +1,30 @@
-# Função para coletar informações sobre o pet
+def validar_entrada_numerica(mensagem, tipo=float):
+    while True:
+        try:
+            valor = tipo(input(mensagem))
+            if valor < 0:
+                print("O valor não pode ser negativo. Tente novamente.")
+            else:
+                return valor
+        except ValueError:
+            print(f"Por favor, insira um valor válido ({'número inteiro' if tipo == int else 'número decimal'}).")
+
 def coletar_informacoes_pet():
     print("Por favor, insira as informações sobre seu pet.")
 
     # Coleta do nome do pet
-    nome = input("Nome do pet: ")
-
-    # Coleta da idade do pet, garantindo que seja um número inteiro
     while True:
-        try:
-            idade = int(input("Idade do pet (em anos): "))
-            if idade < 0:
-                print("A idade não pode ser negativa. Tente novamente.")
-            else:
-                break
-        except ValueError:
-            print("Por favor, insira um número válido para a idade.")
+        nome = input("Nome do pet: ").strip()
+        if nome:
+            break
+        else:
+            print("O nome do pet não pode estar vazio. Tente novamente.")
 
-    # Coleta do peso do pet, garantindo que seja um número flutuante
-    while True:
-        try:
-            peso = float(input("Peso do pet (em kg): "))
-            if peso < 0:
-                print("O peso não pode ser negativo. Tente novamente.")
-            else:
-                break
-        except ValueError:
-            print("Por favor, insira um número válido para o peso.")
+    # Coleta da idade do pet
+    idade = validar_entrada_numerica("Idade do pet (em anos): ", tipo=int)
+
+    # Coleta do peso do pet
+    peso = validar_entrada_numerica("Peso do pet (em kg): ", tipo=float)
 
     # Exibindo as informações coletadas
     print("\nInformações do pet:")
