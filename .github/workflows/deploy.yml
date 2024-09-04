@@ -1,42 +1,46 @@
-name: Deploy API to EC2
+name: Deploy to EC2
 
 on:
   push:
     branches:
-      - main  # Ou a branch que você deseja monitorar para deploy
+      - main
+
+env:
+  AWS_REGION: MY_AWS_REGION               # Define a região da AWS
+  EC2_INSTANCE_ID: MY_EC2_INSTANCE_ID     # ID da instância EC2
+  EC2_PUBLIC_DNS: MY_EC2_PUBLIC_DNS       # DNS público da instância EC2
+  SSH_KEY: ${{ secrets.EC2_SSH_KEY }}     # Chave SSH para acessar a instância EC2
+  APP_DIRECTORY: /path/to/app             # Caminho para o diretório da aplicação na instância EC2
+  REPO_URL: https://github.com/akillez01/projeto-final-ada-achilles.git # URL do repositório
+  BRANCH_NAME: main                       # Nome da branch que você está fazendo o deploy
+
+permissions:
+  contents: read
+  deployments: write
 
 jobs:
-  build:
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Setup SSH key
+      uses: webfactory/ssh-agent@v0.6.0
       with:
-        python-version: '3.x'  # Defina a versão do Python que você está usando
-
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
-
-    - name: Run tests
-      run: |
-        pytest --maxfail=1 --disable-warnings -q
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
     - name: Deploy to EC2
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-        EC2_HOST: ${{ secrets.EC2_HOST }}
-        EC2_USER: ${{ secrets.EC2_USER }}
       run: |
-        echo "$SSH_PRIVATE_KEY" > private_key.pem
-        chmod 600 private_key.pem
-        scp -i private_key.pem -o StrictHostKeyChecking=no -r * $EC2_USER@$EC2_HOST:/path/to/deploy
-        ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
-          cd /path/to/deploy
-          docker-compose down
-          docker-compose up -d --build
+        ssh -o StrictHostKeyChecking=no ec2-user@${{ env.EC2_PUBLIC_DNS }} << 'EOF'
+          # Atualize o repositório
+          cd $APP_DIRECTORY
+          git pull origin $BRANCH_NAME
+          
+          # Instale as dependências e reinicie a aplicação
+          # (ajuste os comandos conforme necessário para sua aplicação)
+          pip install -r requirements.txt
+          sudo systemctl restart myapp.service
         EOF
