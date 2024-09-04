@@ -1,4 +1,3 @@
-# Função para coletar informações sobre o pet
 def coletar_informacoes_pet():
     print("Por favor, insira as informações sobre seu pet.")
 
@@ -27,11 +26,25 @@ def coletar_informacoes_pet():
         except ValueError:
             print("Por favor, insira um número válido para o peso.")
 
+    # Coleta da espécie do pet
+    especie = input("Espécie do pet: ")
+
+    # Coleta do porte do pet, com validação para pequeno, médio ou grande
+    while True:
+        porte = input("Porte do pet (pequeno, médio, grande): ").lower()
+        if porte in ["pequeno", "médio", "medio", "grande"]:
+            porte = "médio" if porte == "medio" else porte  # Corrige a entrada "medio" para "médio"
+            break
+        else:
+            print("Por favor, insira um porte válido (pequeno, médio, grande).")
+
     # Exibindo as informações coletadas
     print("\nInformações do pet:")
     print(f"Nome: {nome}")
     print(f"Idade: {idade} anos")
     print(f"Peso: {peso} kg")
+    print(f"Espécie: {especie}")
+    print(f"Porte: {porte}")
 
 # Chama a função para coletar e exibir as informações do pet
 coletar_informacoes_pet()
