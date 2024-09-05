@@ -1,7 +1,7 @@
-from pet import Pet
-from pet_service import PetService
-from pet_repository import PetRepository
-from pet_controller import PetController
+from model.pet import Pet
+from service.pet_service import PetService
+from repository.pet_repository import PetRepository
+from controller.pet_controller import PetController
 
 def coletar_informacoes_pet():
     print("\nPor favor, insira as informações sobre seu pet.\n")
