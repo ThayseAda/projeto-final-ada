@@ -29,19 +29,28 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        INSTANCE_ID=$(aws ec2 run-instances \
-          --image-id ami-0182f373e66f89c85 \
-          --instance-type t2.micro \
-          --key-name scada \
-          --security-group-ids sg-05ca68f43ee4e7002 \
-          --subnet-id subnet-0d57bd52b47b13707 \
-          --query 'Instances[0].InstanceId' \
+        # Verifica se a instância já existe
+        INSTANCE_ID=$(aws ec2 describe-instances \
+          --filters "Name=tag:Name,Values=my-ec2-instance" \
+          --query "Reservations[*].Instances[*].InstanceId" \
           --output text)
 
-        echo "EC2 instance created with ID: $INSTANCE_ID"
-        
-        # Esperar a instância estar em execução
-        aws ec2 wait instance-running --instance-ids $INSTANCE_ID
+        if [ -z "$INSTANCE_ID" ]; then
+          echo "No instance found. Creating a new EC2 instance..."
+          INSTANCE_ID=$(aws ec2 run-instances \
+            --image-id ami-0182f373e66f89c85 \
+            --instance-type t2.micro \
+            --key-name scada \
+            --security-group-ids sg-05ca68f43ee4e7002 \
+            --subnet-id subnet-0d57bd52b47b13707 \
+            --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=my-ec2-instance}]' \
+            --query 'Instances[0].InstanceId' \
+            --output text)
+          echo "EC2 instance created with ID: $INSTANCE_ID"
+          aws ec2 wait instance-running --instance-ids $INSTANCE_ID
+        else
+          echo "Instance already exists with ID: $INSTANCE_ID"
+        fi
 
         # Pegar o IP público da instância
         INSTANCE_IP=$(aws ec2 describe-instances \
@@ -50,7 +59,6 @@ jobs:
           --output text)
 
         echo "EC2 instance is running at: $INSTANCE_IP"
-
         echo "INSTANCE_IP=$INSTANCE_IP" >> $GITHUB_ENV
 
     - name: Deploy to EC2
@@ -59,34 +67,31 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
       run: |
-        # Cria um arquivo de chave SSH
-        echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ssh_key.pem
+        # Add SSH key
+        echo "$SSH_PRIVATE_KEY" > ssh_key.pem
         chmod 400 ssh_key.pem
-        
-        # Testa a conexão SSH para verificar se a chave está correta
-        ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@$AWS_EC2_IP "echo 'SSH Connection Successful!'"
 
-        # Conecta e realiza o deploy
+        # Deploy to EC2
         ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@$AWS_EC2_IP << 'EOF'
         
           # Atualiza os pacotes
           sudo yum update -y
-        
+
           # Instala o Python e os pacotes necessários
           sudo yum install python3 -y
           pip3 install --user -r /home/ec2-user/projeto-final-ada/requirements.txt
-        
+
           # Instala e configura o Nginx
           sudo yum install nginx -y
           sudo systemctl start nginx
           sudo systemctl enable nginx
-        
+
           # Configura o proxy reverso do Nginx
           sudo bash -c 'cat > /etc/nginx/conf.d/default.conf <<EOL
           server {
               listen 80;
               server_name _;
-        
+
               location / {
                   proxy_pass http://127.0.0.1:5000;
                   proxy_set_header Host \$host;
@@ -97,8 +102,8 @@ jobs:
           }
           EOL'
           sudo systemctl restart nginx
-        
+
           # Inicia a aplicação Python
           nohup python3 /home/ec2-user/projeto-final-ada/app.py > output.log 2>&1 &
-        
+
         EOF
