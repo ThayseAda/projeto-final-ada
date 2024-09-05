@@ -32,7 +32,7 @@ jobs:
         INSTANCE_ID=$(aws ec2 run-instances \
           --image-id ami-0182f373e66f89c85 \
           --instance-type t2.micro \
-          --key-name projfinal \
+          --key-name scada \
           --security-group-ids sg-05ca68f43ee4e7002 \
           --subnet-id subnet-0d57bd52b47b13707 \
           --query 'Instances[0].InstanceId' \
