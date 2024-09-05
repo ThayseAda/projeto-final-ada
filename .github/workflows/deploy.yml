@@ -72,7 +72,7 @@ jobs:
         chmod 400 ssh_key.pem
 
         # Deploy to EC2
-        ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@$AWS_EC2_IP << 'EOF'
+        ssh -i ssh_key.pem ec2-user@$AWS_EC2_IP << 'EOF'
         
           # Atualiza os pacotes
           sudo yum update -y
