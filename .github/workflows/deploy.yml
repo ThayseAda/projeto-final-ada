@@ -62,31 +62,36 @@ jobs:
         echo "INSTANCE_IP=$INSTANCE_IP" >> $GITHUB_ENV
 
     - name: Deploy to EC2
+      env:
+        AWS_EC2_IP: ${{ env.INSTANCE_IP }}
+        SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+
       run: |
+        # Add SSH key
         echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ssh_key.pem
         chmod 400 ssh_key.pem
-        
-        # Testa a conexão SSH
+
+        # Deploy to EC2
         ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@$AWS_EC2_IP << 'EOF'
         
           # Atualiza os pacotes
           sudo yum update -y
-        
+
           # Instala o Python e os pacotes necessários
           sudo yum install python3 -y
           pip3 install --user -r /home/ec2-user/projeto-final-ada/requirements.txt
-        
+
           # Instala e configura o Nginx
           sudo yum install nginx -y
           sudo systemctl start nginx
           sudo systemctl enable nginx
-        
+
           # Configura o proxy reverso do Nginx
           sudo bash -c 'cat > /etc/nginx/conf.d/default.conf <<EOL
           server {
               listen 80;
               server_name _;
-        
+
               location / {
                   proxy_pass http://127.0.0.1:5000;
                   proxy_set_header Host \$host;
@@ -97,8 +102,8 @@ jobs:
           }
           EOL'
           sudo systemctl restart nginx
-        
+
           # Inicia a aplicação Python
           nohup python3 /home/ec2-user/projeto-final-ada/app.py > output.log 2>&1 &
-        
+
         EOF
