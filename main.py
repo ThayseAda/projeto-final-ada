@@ -1,37 +1,25 @@
-# Função para coletar informações sobre o pet
+from pet import Pet
+from pet_service import PetService
+from pet_repository import PetRepository
+from pet_controller import PetController
+
 def coletar_informacoes_pet():
-    print("Por favor, insira as informações sobre seu pet.")
+    print("\nPor favor, insira as informações sobre seu pet.\n")
 
-    # Coleta do nome do pet
-    nome = input("Nome do pet: ")
+    pet_service = PetService()
+    pet_repository = PetRepository("pets.csv")
+    pet_controller = PetController(pet_repository)
 
-    # Coleta da idade do pet, garantindo que seja um número inteiro
-    while True:
-        try:
-            idade = int(input("Idade do pet (em anos): "))
-            if idade < 0:
-                print("A idade não pode ser negativa. Tente novamente.")
-            else:
-                break
-        except ValueError:
-            print("Por favor, insira um número válido para a idade.")
+    nome = pet_service.coletar_nome()
+    idade = pet_service.coletar_idade()
+    peso = pet_service.coletar_peso()
 
-    # Coleta do peso do pet, garantindo que seja um número flutuante
-    while True:
-        try:
-            peso = float(input("Peso do pet (em kg): "))
-            if peso < 0:
-                print("O peso não pode ser negativo. Tente novamente.")
-            else:
-                break
-        except ValueError:
-            print("Por favor, insira um número válido para o peso.")
+    pet = Pet(nome, idade, peso)
 
-    # Exibindo as informações coletadas
-    print("\nInformações do pet:")
-    print(f"Nome: {nome}")
-    print(f"Idade: {idade} anos")
-    print(f"Peso: {peso} kg")
+    pet_controller.inserir_pet(pet)
 
-# Chama a função para coletar e exibir as informações do pet
+    print("\n------------------------\n\nPets\n")
+    pet_controller.listar_pets()
+    print("\n------------------------\n")
+
 coletar_informacoes_pet()
