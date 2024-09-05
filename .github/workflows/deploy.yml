@@ -18,16 +18,44 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Install dependencies
+    - name: Install AWS CLI
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        sudo apt-get update
+        sudo apt-get install -y awscli
 
-    - name: Deploy to EC2
+    - name: Launch EC2 instance
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_EC2_IP: ${{ secrets.AWS_EC2_IP }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+      run: |
+        INSTANCE_ID=$(aws ec2 run-instances \
+          --image-id ami-0dc2d3e4c0f9ebd18 \
+          --instance-type t2.micro \
+          --key-name my-key \
+          --security-group-ids sg-05ca68f43ee4e7002 \
+          --subnet-id subnet-0d57bd52b47b13707 \
+          --query 'Instances[0].InstanceId' \
+          --output text)
+
+        echo "EC2 instance created with ID: $INSTANCE_ID"
+        
+        # Esperar a instância estar em execução
+        aws ec2 wait instance-running --instance-ids $INSTANCE_ID
+
+        # Pegar o IP público da instância
+        INSTANCE_IP=$(aws ec2 describe-instances \
+          --instance-ids $INSTANCE_ID \
+          --query 'Reservations[0].Instances[0].PublicIpAddress' \
+          --output text)
+
+        echo "EC2 instance is running at: $INSTANCE_IP"
+
+        echo "INSTANCE_IP=$INSTANCE_IP" >> $GITHUB_ENV
+
+    - name: Deploy to EC2
+      env:
+        AWS_EC2_IP: ${{ env.INSTANCE_IP }}
         SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
       run: |
@@ -45,7 +73,7 @@ jobs:
           sudo yum install python3 -y
           pip3 install --user -r /home/ec2-user/projeto-final-ada/requirements.txt
 
-          # Configura o Nginx
+          # Instala e configura o Nginx
           sudo yum install nginx -y
           sudo systemctl start nginx
           sudo systemctl enable nginx
