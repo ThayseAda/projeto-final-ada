@@ -31,7 +31,7 @@ jobs:
       run: |
         # Verifica se a instância já existe
         INSTANCE_ID=$(aws ec2 describe-instances \
-          --filters "Name=tag:Name,Values=my-ec2-instance" \
+          --filters "Name=tag:Name,Values=projetoada" \
           --query "Reservations[*].Instances[*].InstanceId" \
           --output text)
 
@@ -43,7 +43,7 @@ jobs:
             --key-name scada \
             --security-group-ids sg-05ca68f43ee4e7002 \
             --subnet-id subnet-0d57bd52b47b13707 \
-            --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=my-ec2-instance}]' \
+            --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=projetoada}]' \
             --query 'Instances[0].InstanceId' \
             --output text)
           echo "EC2 instance created with ID: $INSTANCE_ID"
