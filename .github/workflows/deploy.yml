@@ -69,7 +69,7 @@ jobs:
       run: |
         # Add SSH key
         echo "$SSH_PRIVATE_KEY" > ssh_key.pem
-        chmod 600 ssh_key.pem
+        chmod 400 ssh_key.pem
 
         # Deploy to EC2
         ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@$AWS_EC2_IP << 'EOF'
