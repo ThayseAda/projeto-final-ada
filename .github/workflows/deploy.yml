@@ -68,7 +68,7 @@ jobs:
       run: |
         # Add SSH key
         # Retrieve SSH key from external secrets manager (e.g., AWS Secrets Manager)
-        SSH_PRIVATE_KEY=$(aws secretsmanager get-secret-value --secret-id ${{ secrets.EC2_SSH_PRIVATE_KEY }} --query SecretString --output text)
+        SSH_PRIVATE_KEY=$(aws secretsmanager get-secret-value --verbose --secret-id ${{ secrets.EC2_SSH_PRIVATE_KEY }} --query SecretString --output text)
         echo "$SSH_PRIVATE_KEY" > ssh_key.pem
         chmod 400 ssh_key.pem
 
