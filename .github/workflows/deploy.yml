@@ -87,7 +87,7 @@ jobs:
 
           # Ativar o ambiente virtual e instalar as dependências
           git clone https://github.com/viniciuscaol/projeto-final-ada.git
-          cd /home/ec2-user/projeto-final-ada/projeto-final-ada
+          cd /home/ec2-user/projeto-final-ada/
           pip install -r requirements.txt
 
           # Parar a aplicação se estiver rodando na porta 80
