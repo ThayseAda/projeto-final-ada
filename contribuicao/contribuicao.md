@@ -29,23 +29,23 @@ Este projeto segue os padrões de commit do [Conventional Commits](https://www.c
 2. **Crie uma Nova Branch para sua Contribuição**:
    Escolha um nome descritivo para a branch, de acordo com a funcionalidade ou correção que está implementando:
 
-    ```bash
-    git checkout -b feature/nome-da-sua-feature
-    ```
+   ```bash
+   git checkout -b feature/nome-da-sua-feature
+   ```
 
 3. **Faça as Mudanças e Commite**:
    Realize as alterações e utilize uma mensagem de commit seguindo os padrões mencionados:
 
-    ```bash
-    git commit -m 'feat: descrição clara da mudança'
-    ```
+   ```bash
+   git commit -m 'feat: descrição clara da mudança'
+   ```
 
 4. **Envie suas Mudanças para o GitHub**:
    Suba a branch com suas alterações para o seu fork:
 
-    ```bash
-    git push origin feature/nome-da-sua-feature
-    ```
+   ```bash
+   git push origin feature/nome-da-sua-feature
+   ```
 
 5. **Abra um Pull Request**:
    No GitHub, vá até o repositório original e clique em "Compare & pull request". Descreva suas mudanças e submeta o PR para revisão.

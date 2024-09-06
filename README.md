@@ -10,7 +10,7 @@ Passos para instalar a aplicação.
 
 ## Uso
 
-Como utilizar a aplicação.
+Como utilizar a aplicação..
 
 ## Contribuição
 
