@@ -69,14 +69,14 @@ jobs:
         SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
       run: |
         # Add SSH key
-        echo "$SSH_PRIVATE_KEY" > ssh_key.pem
-        chmod 400 ssh_key.pem
+        echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key.pem
+        chmod 400 /tmp/ssh_key.pem
 
         # Copy Docker image to EC2
-        scp -o StrictHostKeyChecking=no -i ssh_key.pem ./projeto-final-ada.tar ec2-user@$AWS_EC2_IP:/home/ec2-user/
+        scp -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ./projeto-final-ada.tar ec2-user@$AWS_EC2_IP:/home/ec2-user/
 
         # SSH into EC2 and load the Docker image
-        ssh -o StrictHostKeyChecking=no -i ssh_key.pem ec2-user@$AWS_EC2_IP << 'EOF'
+        ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ec2-user@$AWS_EC2_IP << EOF
           sudo yum update -y
           sudo yum install docker -y
           sudo systemctl start docker
