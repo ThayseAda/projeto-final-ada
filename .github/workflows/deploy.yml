@@ -68,12 +68,12 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key.pem
         chmod 600 /tmp/ssh_key.pem
 
-         # Conectar na instância EC2 via SSH e executar os comandos de deploy
+        # Conectar na instância EC2 via SSH e executar os comandos de deploy
         ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ec2-user@$AWS_EC2_IP << EOF
-          
-          # Atualizar pacotes e instalar Python3 e Nginx
+
+          # Atualizar pacotes e instalar Python3
           sudo yum update -y
-          sudo yum install python3 nginx -y
+          sudo yum install python3 -y
 
           # Instalar pip3 e criar virtualenv para a aplicação
           sudo pip3 install virtualenv
@@ -86,26 +86,48 @@ jobs:
           cd /home/ec2-user/app
           pip install -r requirements.txt
 
-          # Configurar Nginx como proxy reverso
-          sudo bash -c 'cat > /etc/nginx/conf.d/flask_app.conf <<EOL
-          server {
-              listen 80;
-              server_name _;
+          # Parar a aplicação se estiver rodando na porta 80
+          sudo fuser -k 80/tcp || true
 
-              location / {
-                  proxy_pass http://127.0.0.1:5000;
-                  proxy_set_header Host \$host;
-                  proxy_set_header X-Real-IP \$remote_addr;
-                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-                  proxy_set_header X-Forwarded-Proto \$scheme;
-              }
-          }
-          EOL'
-          sudo systemctl restart nginx
-
-          # Parar a aplicação se estiver rodando na porta 5000
-          fuser -k 5000/tcp || true
-
-          # Executar a aplicação Flask em background na porta 5000
-          nohup python3 /home/ec2-user/app/app.py > /home/ec2-user/app/output.log 2>&1 &
+          # Executar a aplicação Flask na porta 80
+          nohup python3 /home/ec2-user/app/app.py --host=0.0.0.0 --port=80 > /home/ec2-user/app/output.log 2>&1 &
         EOF
+          
+        #   # Atualizar pacotes e instalar Python3 e Nginx
+        #   sudo yum update -y
+        #   sudo yum install python3 nginx -y
+
+        #   # Instalar pip3 e criar virtualenv para a aplicação
+        #   sudo pip3 install virtualenv
+        #   if [ ! -d "/home/ec2-user/myenv" ]; then
+        #     virtualenv /home/ec2-user/myenv
+        #   fi
+
+        #   # Ativar o ambiente virtual e instalar as dependências
+        #   source /home/ec2-user/myenv/bin/activate
+        #   cd /home/ec2-user/app
+        #   pip install -r requirements.txt
+
+        #   # Configurar Nginx como proxy reverso
+        #   sudo bash -c 'cat > /etc/nginx/conf.d/flask_app.conf <<EOL
+        #   server {
+        #       listen 80;
+        #       server_name _;
+
+        #       location / {
+        #           proxy_pass http://127.0.0.1:5000;
+        #           proxy_set_header Host \$host;
+        #           proxy_set_header X-Real-IP \$remote_addr;
+        #           proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        #           proxy_set_header X-Forwarded-Proto \$scheme;
+        #       }
+        #   }
+        #   EOL'
+        #   sudo systemctl restart nginx
+
+        #   # Parar a aplicação se estiver rodando na porta 5000
+        #   fuser -k 5000/tcp || true
+
+        #   # Executar a aplicação Flask em background na porta 5000
+        #   nohup python3 /home/ec2-user/app/app.py > /home/ec2-user/app/output.log 2>&1 &
+        # EOF
