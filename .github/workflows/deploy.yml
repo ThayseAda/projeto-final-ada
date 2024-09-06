@@ -71,7 +71,6 @@ jobs:
         # Add SSH key
         echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key.pem
         chmod 400 /tmp/ssh_key.pem
-        cat /tmp/ssh_key.pem
 
         # Copy Docker image to EC2
         scp -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ./projeto-final-ada.tar ec2-user@$AWS_EC2_IP:/home/ec2-user/
