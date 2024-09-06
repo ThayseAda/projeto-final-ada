@@ -66,9 +66,9 @@ jobs:
     - name: Deploy Docker to EC2
       env:
         AWS_EC2_IP: ${{ env.INSTANCE_IP }}
+        SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
       run: |
         # Add SSH key
-        SSH_PRIVATE_KEY=$(aws secretsmanager get-secret-value --secret-id ${{ secrets.EC2_SSH_PRIVATE_KEY }} --query SecretString --output text)
         echo "$SSH_PRIVATE_KEY" > ssh_key.pem
         chmod 400 ssh_key.pem
 
