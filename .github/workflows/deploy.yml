@@ -1,5 +1,3 @@
-name: Deploy to EC2 with Docker
-
 on:
   push:
     branches:
@@ -13,12 +11,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up Docker
-      uses: docker/setup-buildx-action@v2
-
-    - name: Build Docker image
-      run: |
-        docker build -t projeto-final-ada .
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
 
     - name: Install AWS CLI
       run: |
@@ -72,14 +68,44 @@ jobs:
         echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key.pem
         chmod 600 /tmp/ssh_key.pem
 
-        # Copy Docker image to EC2
-        scp -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ./projeto-final-ada.tar ec2-user@$AWS_EC2_IP:/home/ec2-user/
-
-        # SSH into EC2 and load the Docker image
+         # Conectar na instância EC2 via SSH e executar os comandos de deploy
         ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ec2-user@$AWS_EC2_IP << EOF
+          
+          # Atualizar pacotes e instalar Python3 e Nginx
           sudo yum update -y
-          sudo yum install docker -y
-          sudo systemctl start docker
-          sudo docker load -i /home/ec2-user/projeto-final-ada.tar
-          sudo docker run -d -p 80:5000 projeto-final-ada
+          sudo yum install python3 nginx -y
+
+          # Instalar pip3 e criar virtualenv para a aplicação
+          sudo pip3 install virtualenv
+          if [ ! -d "/home/ec2-user/myenv" ]; then
+            virtualenv /home/ec2-user/myenv
+          fi
+
+          # Ativar o ambiente virtual e instalar as dependências
+          source /home/ec2-user/myenv/bin/activate
+          cd /home/ec2-user/app
+          pip install -r requirements.txt
+
+          # Configurar Nginx como proxy reverso
+          sudo bash -c 'cat > /etc/nginx/conf.d/flask_app.conf <<EOL
+          server {
+              listen 80;
+              server_name _;
+
+              location / {
+                  proxy_pass http://127.0.0.1:5000;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Real-IP \$remote_addr;
+                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto \$scheme;
+              }
+          }
+          EOL'
+          sudo systemctl restart nginx
+
+          # Parar a aplicação se estiver rodando na porta 5000
+          fuser -k 5000/tcp || true
+
+          # Executar a aplicação Flask em background na porta 5000
+          nohup python3 /home/ec2-user/app/app.py > /home/ec2-user/app/output.log 2>&1 &
         EOF
