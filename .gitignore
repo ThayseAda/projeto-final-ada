@@ -1,0 +1,6 @@
+# Ignorar arquivos de configuração de ambiente
+.env
+
+# Ignorar arquivos de configuração do sistema operacional
+.DS_Store
+Thumbs.db
