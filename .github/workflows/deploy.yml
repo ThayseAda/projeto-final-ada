@@ -74,7 +74,7 @@ jobs:
           # Atualizar pacotes e instalar Python3
           sudo yum update -y
           sudo yum install python3 -y
-          sudo yun install git -y
+          sudo yum install git -y
 
           # Instalar pip3 e criar virtualenv para a aplicação
           sudo pip3 install virtualenv
