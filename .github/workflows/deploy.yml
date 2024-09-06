@@ -79,6 +79,8 @@ jobs:
           sudo yum install python3-pip -y
           sudo yun install git -y
 
+          git clone https://github.com/viniciuscaol/projeto-final-ada.git
+           
           # Instalar pip3 e criar virtualenv para a aplicação
           sudo pip3 install virtualenv
           if [ ! -d "/home/ec2-user/myenv" ]; then
@@ -86,7 +88,7 @@ jobs:
           fi
 
           # Ativar o ambiente virtual e instalar as dependências
-          git clone https://github.com/viniciuscaol/projeto-final-ada.git
+         
           cd /home/ec2-user/projeto-final-ada/
           pip install -r requirements.txt
 
