@@ -96,5 +96,5 @@ jobs:
           sudo fuser -k 80/tcp || true
 
           # Executar a aplicação Flask na porta 80
-          nohup python3 app.py --host=0.0.0.0 --port=80 > /home/ec2-user/projeto-final-ada/output.log 2>&1 &
+          sudo nohup python3 app.py --host=0.0.0.0 --port=80 > /home/ec2-user/projeto-final-ada/output.log 2>&1 &
         EOF
