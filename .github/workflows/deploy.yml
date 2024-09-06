@@ -1,3 +1,5 @@
+name: Deploy no EC2
+
 on:
   push:
     branches:
@@ -59,7 +61,7 @@ jobs:
         echo "EC2 instance is running at: $INSTANCE_IP"
         echo "INSTANCE_IP=$INSTANCE_IP" >> $GITHUB_ENV
 
-    - name: Deploy Docker to EC2
+    - name: Deploy to EC2
       env:
         AWS_EC2_IP: ${{ env.INSTANCE_IP }}
         SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
@@ -74,6 +76,7 @@ jobs:
           # Atualizar pacotes e instalar Python3
           sudo yum update -y
           sudo yum install python3 -y
+          sudo yum install python3-pip -y
           sudo yun install git -y
 
           # Instalar pip3 e criar virtualenv para a aplicação
@@ -84,12 +87,12 @@ jobs:
 
           # Ativar o ambiente virtual e instalar as dependências
           git clone https://github.com/viniciuscaol/projeto-final-ada.git
-          cd projeto-final-ada
+          cd /home/ec2-user/projeto-final-ada/projeto-final-ada
           pip install -r requirements.txt
 
           # Parar a aplicação se estiver rodando na porta 80
           sudo fuser -k 80/tcp || true
 
           # Executar a aplicação Flask na porta 80
-          nohup python3 app.py --host=0.0.0.0 --port=80 > /home/ec2-user/app/output.log 2>&1 &
+          nohup python3 app.py --host=0.0.0.0 --port=80 > /home/ec2-user/projeto-final-ada/output.log 2>&1 &
         EOF
