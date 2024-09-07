@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Resultado do Cadastro</h1>
+    </header>
+    <main>
+        <h2>Informações do Pet</h2>
+        <p><strong>Nome:</strong> {{ nome }}</p>
+        <p><strong>Raça:</strong> {{ raca }}</p>
+        <p><strong>Idade:</strong> {{ idade }} anos</p>
+        <p><strong>Peso:</strong> {{ peso }} kg</p>
+        <p><strong>Vacinado:</strong> {{ vacinado }}</p>
+    </main>
+    <footer>
+        <p>&copy; 2024 Anjos da Rua </p>
+    </footer>
+</body>
+</html>
