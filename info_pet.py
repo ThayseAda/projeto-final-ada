@@ -1,36 +1,55 @@
-def validar_entrada_numerica(mensagem, tipo=float):
-    while True:
-        try:
-            valor = tipo(input(mensagem))
-            if valor < 0:
-                print("O valor não pode ser negativo. Tente novamente.")
-            else:
-                return valor
-        except ValueError:
-            print(f"Por favor, insira um valor válido ({'número inteiro' if tipo == int else 'número decimal'}).")
+import tkinter as tk
+from tkinter import messagebox
 
+# Função para coletar as informações do pet
 def coletar_informacoes_pet():
-    print("Por favor, insira as informações sobre seu pet.")
+    nome = entry_nome.get()
+    
+    # Validando a idade
+    try:
+        idade = int(entry_idade.get())
+        if idade < 0:
+            raise ValueError("Idade não pode ser negativa.")
+    except ValueError:
+        messagebox.showerror("Erro", "Por favor, insira uma idade válida (número inteiro).")
+        return
 
-    # Coleta do nome do pet
-    while True:
-        nome = input("Nome do pet: ").strip()
-        if nome:
-            break
-        else:
-            print("O nome do pet não pode estar vazio. Tente novamente.")
-
-    # Coleta da idade do pet
-    idade = validar_entrada_numerica("Idade do pet (em anos): ", tipo=int)
-
-    # Coleta do peso do pet
-    peso = validar_entrada_numerica("Peso do pet (em kg): ", tipo=float)
+    # Validando o peso
+    try:
+        peso = float(entry_peso.get())
+        if peso < 0:
+            raise ValueError("Peso não pode ser negativo.")
+    except ValueError:
+        messagebox.showerror("Erro", "Por favor, insira um peso válido (número decimal).")
+        return
 
     # Exibindo as informações coletadas
-    print("\nInformações do pet:")
-    print(f"Nome: {nome}")
-    print(f"Idade: {idade} anos")
-    print(f"Peso: {peso} kg")
+    resultado = f"Nome: {nome}\nIdade: {idade} anos\nPeso: {peso} kg"
+    messagebox.showinfo("Informações do Pet", resultado)
 
-# Chama a função para coletar e exibir as informações do pet
-coletar_informacoes_pet()
+# Criando a janela principal
+janela = tk.Tk()
+janela.title("Coletar Informações do Pet")
+
+# Rótulos e campos de entrada para nome, idade e peso
+label_nome = tk.Label(janela, text="Nome do pet:")
+label_nome.grid(row=0, column=0, padx=10, pady=10)
+entry_nome = tk.Entry(janela)
+entry_nome.grid(row=0, column=1, padx=10, pady=10)
+
+label_idade = tk.Label(janela, text="Idade do pet (em anos):")
+label_idade.grid(row=1, column=0, padx=10, pady=10)
+entry_idade = tk.Entry(janela)
+entry_idade.grid(row=1, column=1, padx=10, pady=10)
+
+label_peso = tk.Label(janela, text="Peso do pet (em kg):")
+label_peso.grid(row=2, column=0, padx=10, pady=10)
+entry_peso = tk.Entry(janela)
+entry_peso.grid(row=2, column=1, padx=10, pady=10)
+
+# Botão para coletar as informações
+botao_coletar = tk.Button(janela, text="Coletar Informações", command=coletar_informacoes_pet)
+botao_coletar.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+
+# Executando o loop da janela
+janela.mainloop()
