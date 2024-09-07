@@ -8,9 +8,10 @@ Este repositório é um fork do [projeto final github](https://github.com/jltdsj
 
 Passos para instalar a aplicação.
 
-## Uso
+## Funcionalidades do app
 
-Como utilizar a aplicação..
+- Adicionar novos pets com nome, idade, peso, espécie e porte.
+- Visualizar a informação do pets cadastrado.
 
 ## Contribuição
 
