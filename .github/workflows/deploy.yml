@@ -1,0 +1,45 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app.py'
+      - 'requirements.txt'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          # Adicione o comando para rodar os testes, se necessário
+          echo "Running tests..."
+
+      - name: Deploy to AWS EC2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+          EC2_IP: ${{ secrets.EC2_IP }}
+          EC2_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+        run: |
+          echo "$EC2_PRIVATE_KEY" > /tmp/ec2-key.pem
+          chmod 400 /tmp/ec2-key.pem
+          ssh -i "/tmp/ec2-key.pem" ec2-user@$EC2_IP "cd /home/ec2-user/app && git pull origin main && systemctl restart gunicorn"
