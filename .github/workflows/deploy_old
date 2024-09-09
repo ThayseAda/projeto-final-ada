@@ -1,0 +1,85 @@
+# name: Deploy to EC2 with Docker
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#     - name: Checkout code
+#       uses: actions/checkout@v2
+
+#     - name: Set up Docker
+#       uses: docker/setup-buildx-action@v2
+
+#     - name: Build Docker image
+#       run: |
+#         docker build -t projeto-final-ada .
+
+#     - name: Install AWS CLI
+#       run: |
+#         sudo apt-get update
+#         sudo apt-get install -y awscli
+
+#     - name: Launch EC2 instance
+#       env:
+#         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#         AWS_REGION: ${{ secrets.AWS_REGION }}
+#       run: |
+#         # Verifica se a instância já existe
+#         INSTANCE_ID=$(aws ec2 describe-instances \
+#           --filters "Name=tag:Name,Values=projetoada" \
+#           --query "Reservations[*].Instances[*].InstanceId" \
+#           --output text)
+
+#         if [ -z "$INSTANCE_ID" ]; then
+#           echo "No instance found. Creating a new EC2 instance..."
+#           INSTANCE_ID=$(aws ec2 run-instances \
+#             --image-id ami-0182f373e66f89c85 \
+#             --instance-type t2.micro \
+#             --key-name scada \
+#             --security-group-ids sg-05ca68f43ee4e7002 \
+#             --subnet-id subnet-0d57bd52b47b13707 \
+#             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=projetoada}]' \
+#             --query 'Instances[0].InstanceId' \
+#             --output text)
+#           echo "EC2 instance created with ID: $INSTANCE_ID"
+#           aws ec2 wait instance-running --instance-ids $INSTANCE_ID
+#         else
+#           echo "Instance already exists with ID: $INSTANCE_ID"
+#         fi
+
+#         # Pegar o IP público da instância
+#         INSTANCE_IP=$(aws ec2 describe-instances \
+#           --instance-ids $INSTANCE_ID \
+#           --query 'Reservations[0].Instances[0].PublicIpAddress' \
+#           --output text)
+
+#         echo "EC2 instance is running at: $INSTANCE_IP"
+#         echo "INSTANCE_IP=$INSTANCE_IP" >> $GITHUB_ENV
+
+#     - name: Deploy Docker to EC2
+#       env:
+#         AWS_EC2_IP: ${{ env.INSTANCE_IP }}
+#         SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+#       run: |
+#         # Add SSH key
+#         echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key.pem
+#         chmod 600 /tmp/ssh_key.pem
+
+#         # Copy Docker image to EC2
+#         scp -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ./projeto-final-ada.tar ec2-user@$AWS_EC2_IP:/home/ec2-user/
+
+#         # SSH into EC2 and load the Docker image
+#         ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ec2-user@$AWS_EC2_IP << EOF
+#           sudo yum update -y
+#           sudo yum install docker -y
+#           sudo systemctl start docker
+#           sudo docker load -i /home/ec2-user/projeto-final-ada.tar
+#           sudo docker run -d -p 80:5000 projeto-final-ada
+#         EOF

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Pets</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Consulta de Pets</h1>
+        <form action="/consulta" method="GET">
+            <label for="criterio">Selecionar critério:</label>
+            <select id="criterio" name="criterio" value="{{ criterio or 'nome' }}">
+                <option value="nome" {% if criterio == 'nome' %}selected{% endif %}>Nome</option>
+                <option value="idade" {% if criterio == 'idade' %}selected{% endif %}>Idade</option>
+                <option value="peso" {% if criterio == 'peso' %}selected{% endif %}>Peso</option>
+            </select>
+
+            <label for="valor">Digite o valor da busca:</label>
+            <input type="text" id="valor" name="valor" value="{{ valor or '' }}">
+
+            <button type="submit">Buscar</button>
+        </form>
+
+        {% if pets %}
+        <h2>Resultado da Busca:</h2>
+        <ul>
+            {% for pet in pets %}
+                <li>
+                    Nome: {{ pet[1] }} - Idade: {{ pet[2] }} anos - Peso: {{ pet[3] }} kg
+                    <a class="edit-button" href="/editar/{{ pet[0] }}">Editar</a>
+                </li>
+            {% endfor %}
+        </ul>
+        {% elif valor %}
+        <p>Nenhum pet encontrado para os critérios de busca.</p>
+        {% endif %}
+
+        <a href="/">Voltar</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,185 @@
+name: Deploy no EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    - name: Install AWS CLI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y awscli
+
+    - name: Launch EC2 instance
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        AWS_SG: ${{ secrets.AWS_SG }}
+        AWS_SUBNET: ${{ secrets.AWS_SUBNET }}
+      run: |
+        # Verifica se a instância já existe
+        INSTANCE_ID=$(aws ec2 describe-instances \
+          --filters "Name=tag:Name,Values=projetoada" \
+          --query "Reservations[*].Instances[*].InstanceId" \
+          --output text)
+
+        if [ -z "$INSTANCE_ID" ]; then
+          echo "No instance found. Creating a new EC2 instance..."
+          INSTANCE_ID=$(aws ec2 run-instances \
+            --image-id ami-0182f373e66f89c85 \
+            --instance-type t2.micro \
+            --key-name scada \
+            --security-group-ids $AWS_SG \
+            --subnet-id $AWS_SUBNET \
+            --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=projetoada}]' \
+            --query 'Instances[0].InstanceId' \
+            --output text)
+          echo "EC2 instance created with ID: $INSTANCE_ID"
+          aws ec2 wait instance-running --instance-ids $INSTANCE_ID
+        else
+          echo "Instance already exists with ID: $INSTANCE_ID"
+        fi
+
+        # Pegar o IP público da instância
+        INSTANCE_IP=$(aws ec2 describe-instances \
+          --instance-ids $INSTANCE_ID \
+          --query 'Reservations[0].Instances[0].PublicIpAddress' \
+          --output text)
+
+        echo "EC2 instance is running at: $INSTANCE_IP"
+        echo "INSTANCE_IP=$INSTANCE_IP" >> $GITHUB_ENV
+
+    - name: Deploy to EC2
+      env:
+        AWS_EC2_IP: ${{ env.INSTANCE_IP }}
+        SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+      run: |
+        # Add SSH key
+        echo "$SSH_PRIVATE_KEY" > /tmp/ssh_key.pem
+        chmod 600 /tmp/ssh_key.pem
+
+        # Conectar na instância EC2 via SSH e executar os comandos de deploy
+        ssh -o StrictHostKeyChecking=no -i /tmp/ssh_key.pem ec2-user@$AWS_EC2_IP << EOF
+
+          # Atualizar pacotes e instalar Python3
+          sudo yum update -y
+          sudo yum install python3 -y
+          sudo yum install python3-pip -y
+          sudo yum install git -y
+          sudo yum install nginx -y
+
+
+          git clone https://github.com/viniciuscaol/projeto-final-ada.git
+            
+          # Instalar pip3 e criar virtualenv para a aplicação
+          sudo pip3 install virtualenv
+          if [ ! -d "/home/ec2-user/myenv" ]; then
+            virtualenv /home/ec2-user/myenv
+          fi
+
+          # Ativar o ambiente virtual e instalar as dependências
+
+          cd /home/ec2-user/projeto-final-ada/
+          pip install -r requirements.txt
+
+          # Executar a aplicação Flask na porta 80
+          python3 /home/ec2-user/projeto-final-ada/app.py > /home/ec2-user/projeto-final-ada/output.log 2>&1 &
+
+          sudo tee /etc/nginx/nginx.conf << EOF
+                # For more information on configuration, see:
+                #   * Official English Documentation: http://nginx.org/en/docs/
+                #   * Official Russian Documentation: http://nginx.org/ru/docs/
+                
+                user nginx;
+                worker_processes auto;
+                error_log /var/log/nginx/error.log notice;
+                pid /run/nginx.pid;
+                
+                # Load dynamic modules. See /usr/share/doc/nginx/README.dynamic.
+                include /usr/share/nginx/modules/*.conf;
+                
+                events {
+                    worker_connections 1024;
+                }
+                
+                http {
+                    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                                      '$status $body_bytes_sent "$http_referer" '
+                                      '"$http_user_agent" "$http_x_forwarded_for"';
+                
+                    access_log  /var/log/nginx/access.log  main;
+                
+                    sendfile            on;
+                    tcp_nopush          on;
+                    keepalive_timeout   65;
+                    types_hash_max_size 4096;
+                
+                    include             /etc/nginx/mime.types;
+                    default_type        application/octet-stream;
+                
+                    # Load modular configuration files from the /etc/nginx/conf.d directory.
+                    # See http://nginx.org/en/docs/ngx_core_module.html#include
+                    # for more information.
+                    include /etc/nginx/conf.d/*.conf;
+                
+                    server {
+                        listen       80;
+                        listen       [::]:80;
+                        server_name  _;
+                        
+                        location / {
+                          proxy_pass http://localhost:5000;
+                          proxy_set_header Host $host;
+                          proxy_set_header X-Real-IP $remote_addr;
+                          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                          proxy_set_header X-Forwarded-Proto $scheme;
+                        }
+                    }
+                
+                # Settings for a TLS enabled server.
+                #
+                #    server {
+                #        listen       443 ssl http2;
+                #        listen       [::]:443 ssl http2;
+                #        server_name  _;
+                #        root         /usr/share/nginx/html;
+                #
+                #        ssl_certificate "/etc/pki/nginx/server.crt";
+                #        ssl_certificate_key "/etc/pki/nginx/private/server.key";
+                #        ssl_session_cache shared:SSL:1m;
+                #        ssl_session_timeout  10m;
+                #        ssl_ciphers PROFILE=SYSTEM;
+                #        ssl_prefer_server_ciphers on;
+                #
+                #        # Load configuration files for the default server block.
+                #        include /etc/nginx/default.d/*.conf;
+                #
+                #        error_page 404 /404.html;
+                #        location = /404.html {
+                #        }
+                #
+                #        error_page 500 502 503 504 /50x.html;
+                #        location = /50x.html {
+                #        }
+                #    }
+                  }
+          EOF
+
+          sudo systemctl start nginx
+          sudo systemctl enable nginx
+        EOF
+          

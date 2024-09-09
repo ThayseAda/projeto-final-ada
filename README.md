@@ -22,6 +22,7 @@ Esta é uma aplicação web simples para cadastrar e consultar informações sob
   - `index.html`: Tela inicial para seleção de cadastro ou consulta.
   - `cadastro.html`: Página para o cadastro de novos pets.
   - `consulta.html`: Página para a consulta e visualização dos pets cadastrados.
+  - `editar.html`: Página para editar os pets cadastrados
 - `static/`: Diretório contendo arquivos estáticos como CSS e imagens.
   - `style.css`: Arquivo de estilização para as páginas HTML.
 
@@ -29,8 +30,8 @@ Esta é uma aplicação web simples para cadastrar e consultar informações sob
 
 1. **Clone o Repositório:**
 ```bash
-   git clone https://github.com/seu-usuario/seu-repositorio.git
-   cd seu-repositorio
+   git https://github.com/viniciuscaol/projeto-final-ada.git
+   cd projeto-final-ada
 ```
 
 2. **Instale as Dependências:** Certifique-se de ter o Python instalado e crie um ambiente virtual:
@@ -45,8 +46,11 @@ Em seguida, instale as dependências:
 
 3. **Inicialize o Banco de Dados:** Certifique-se de que o arquivo **pet.db**  esteja criado e configure o esquema do banco de dados. O arquivo **app.py** deve criar automaticamente o banco de dados e a tabela pets se não existirem.
 </br>
+
 4. **Execute a Aplicação:**
 ```bash
-python app.py
+  python app.py
 ```
 A aplicação estará disponível em http://localhost:5000.
+
+---
