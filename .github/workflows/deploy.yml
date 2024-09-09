@@ -28,6 +28,8 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
+        AWS_SG: ${{ secrets.AWS_SG }}
+        AWS_SUBNET: ${{ secrets.AWS_SUBNET }}
       run: |
         # Verifica se a instância já existe
         INSTANCE_ID=$(aws ec2 describe-instances \
@@ -41,8 +43,8 @@ jobs:
             --image-id ami-0182f373e66f89c85 \
             --instance-type t2.micro \
             --key-name scada \
-            --security-group-ids sg-05ca68f43ee4e7002 \
-            --subnet-id subnet-0d57bd52b47b13707 \
+            --security-group-ids $AWS_SG \
+            --subnet-id $AWS_SUBNET \
             --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=projetoada}]' \
             --query 'Instances[0].InstanceId' \
             --output text)
