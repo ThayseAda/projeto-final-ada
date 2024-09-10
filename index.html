@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coletar Informações do Pet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        form {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+        input[type="text"], input[type="number"], input[type="submit"], select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Informações do Pet</h1>
+
+    <form id="petForm">
+        <label for="nome">Nome do pet:</label>
+        <input type="text" id="nome" name="nome" required>
+
+        <label for="idade">Idade do pet (em anos):</label>
+        <input type="number" id="idade" name="idade" min="0" required>
+
+        <label for="peso">Peso do pet (em kg):</label>
+        <input type="number" id="peso" name="peso" step="0.01" min="0" required>
+
+        <label for="especie">Espécie do pet:</label>
+        <input type="text" id="especie" name="especie" required>
+
+        <label for="porte">Porte do pet:</label>
+        <select id="porte" name="porte" required>
+            <option value="">Selecione</option>
+            <option value="pequeno">Pequeno</option>
+            <option value="médio">Médio</option>
+            <option value="grande">Grande</option>
+        </select>
+
+        <input type="submit" value="Enviar">
+    </form>
+
+    <div id="resultado" style="margin-top: 20px;"></div>
+
+    <script>
+        document.getElementById('petForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Coletando os valores dos campos do formulário
+            const nome = document.getElementById('nome').value;
+            const idade = document.getElementById('idade').value;
+            const peso = document.getElementById('peso').value;
+            const especie = document.getElementById('especie').value;
+            const porte = document.getElementById('porte').value;
+
+            // Exibindo as informações coletadas
+            document.getElementById('resultado').innerHTML = `
+                <h2>Informações do Pet:</h2>
+                <p><strong>Nome:</strong> ${nome}</p>
+                <p><strong>Idade:</strong> ${idade} anos</p>
+                <p><strong>Peso:</strong> ${peso} kg</p>
+                <p><strong>Espécie:</strong> ${especie}</p>
+                <p><strong>Porte:</strong> ${porte}</p>
+            `;
+        });
+    </script>
+
+</body>
+</html>
