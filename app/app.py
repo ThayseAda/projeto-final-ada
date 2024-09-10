@@ -17,21 +17,23 @@ class Pets(Resource):
 
             # Extração e validação dos dados do JSON
             data = request.get_json()
+            Nome = data.get("Nome")
             Especie = data.get('Especie')
             Idade = data.get('Idade')
             Peso = data.get('Peso')
             Data = data.get('Data')  # Certifique-se de que a chave 'Data' está no JSON
             Historico = data.get('Historico')
 
-            if not all([Especie, Idade, Peso, Data, Historico]):
+            if not all([Nome,Especie, Idade, Peso, Data, Historico]):
                 return {'message': 'Missing data'}, 400
 
             # Inserção com parâmetros para evitar SQL Injection
             insert_query = text("""
-                INSERT INTO Pets (Especie, Idade, Peso, Data, Historico)
-                VALUES (:Especie, :Idade, :Peso, :Data, :Historico)
+                INSERT INTO Pets (Nome,Especie,Idade,Peso,Data,Historico)
+                VALUES (:Nome,:Especie,:Idade,:Peso,:Data,:Historico)
             """)
             conn.execute(insert_query, {
+                'Nome': Nome,
                 'Especie': Especie,
                 'Idade': Idade,
                 'Peso': Peso,
