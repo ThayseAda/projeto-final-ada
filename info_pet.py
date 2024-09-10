@@ -27,11 +27,20 @@ def coletar_informacoes_pet():
         except ValueError:
             print("Por favor, insira um número válido para o peso.")
 
+    # Definindo a classificação de risco
+    if peso < 5:
+        classificacao = "Verde - Tranquilo"
+    elif peso < 15:
+        classificacao = "Amarelo - Manter sob observação, mas sem risco de mordida"
+    else:
+        classificacao = "Vermelho - Risco de morte"
+
     # Exibindo as informações coletadas
     print("\nInformações do pet:")
     print(f"Nome: {nome}")
     print(f"Idade: {idade} anos")
     print(f"Peso: {peso} kg")
+    print(f"Classificação de Risco: {classificacao}")
 
 # Chama a função para coletar e exibir as informações do pet
 coletar_informacoes_pet()
