@@ -55,9 +55,52 @@ class Pets(Resource):
            conn.rollback()
         finally:
            conn.close()
-         
+class PetsById(Resource):
+    def delete(self, Id):
+        conn = db_connect.connect()
+        try:
+           
+            delete_query = text("""
+                DELETE FROM Pets WHERE Id = :Id
+            """)
+            result = conn.execute(delete_query, {'Id': Id})
+            conn.commit()
 
+            if result.rowcount == 0:
+                return {"Mensagem": "Pet não Encontrado"}, 404
+
+            return {"Status": "Pet Deletado com Sucesso"}
+
+        except SQLAlchemyError as e:
+            conn.rollback()
+            return {"Mensagem": str(e)}, 500
+        finally:
+            conn.close()
+
+    def get(self, Id):
+        conn = db_connect.connect()
+        try:
+    
+            select_query = text("""
+                SELECT * FROM Pets WHERE Id = :Id
+            """)
+            query = conn.execute(select_query, {'Id': Id})
+            result = [dict(zip(query.keys(), row)) for row in query.fetchall()]
+
+            if not result:
+                return {"Mensagem": "Pet não Encontrado!"}, 404
+
+            return jsonify(result)
+
+        except SQLAlchemyError as e:
+            return {"Mensagem": str(e)}, 500
+        finally:
+            conn.close()
+            
 api.add_resource(Pets, '/pets')
+api.add_resource(PetsById, '/pets/<int:id>')                 
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
