@@ -15,3 +15,5 @@ cursor.execute("""
                );
                """) 
 conn.commit()
+
+print("Conectado com Sucesso!!")
